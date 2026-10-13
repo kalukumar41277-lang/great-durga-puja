@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#271126">
+  <title>Admin approvals — Great Durga Puja</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #271126;
+      background: #fffaf1;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button, input { font: inherit; }
+    .top { color: #fff8eb; background: #271126; }
+    .top-inner, main { width: min(960px, calc(100% - 32px)); margin: auto; }
+    .top-inner { min-height: 70px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { font-weight: 850; letter-spacing: -.03em; }
+    .top a { color: #f5bd54; text-decoration: none; font-size: .9rem; }
+    main { padding: 44px 0 80px; }
+    h1, h2 { margin-top: 0; font-family: Georgia, "Times New Roman", serif; letter-spacing: -.04em; }
+    h1 { margin-bottom: 10px; font-size: clamp(2.2rem, 6vw, 3.5rem); }
+    h2 { margin-bottom: 8px; font-size: 1.55rem; }
+    p { line-height: 1.6; }
+    .intro { color: #71636d; }
+    .panel { margin-top: 26px; padding: 26px; border: 1px solid rgba(39,17,38,.12); border-radius: 18px; background: #fffdf8; box-shadow: 0 18px 50px rgba(58,25,44,.08); }
+    .login-panel { max-width: 460px; }
+    label { display: block; margin: 16px 0 7px; font-weight: 700; font-size: .87rem; }
+    input { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #ddd2d7; border-radius: 9px; }
+    input:focus { outline: 3px solid rgba(168,42,82,.15); border-color: #a82a52; }
+    .button { min-height: 42px; padding: 10px 17px; border: 0; border-radius: 999px; color: white; background: #a82a52; font-weight: 750; cursor: pointer; }
+    .button:hover { background: #87203f; }
+    .button:disabled { opacity: .6; cursor: wait; }
+    .button.secondary { color: #271126; background: #f5eddf; }
+    .button.danger { color: #7b263c; background: #fff0ee; }
+    .actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 15px; }
+    .error, .notice { margin: 15px 0 0; padding: 12px 14px; border-radius: 10px; font-size: .88rem; line-height: 1.55; }
+    .error { color: #7b263c; background: #fff0ee; }
+    .notice { color: #5b4219; background: #fff7e7; }
+    [hidden] { display: none !important; }
+    .dashboard-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 15px; }
+    .dashboard-header p { margin-bottom: 0; color: #71636d; font-size: .88rem; }
+    .connection { min-height: 24px; margin: 15px 0 0; color: #71636d; font-size: .83rem; }
+    .action-result { margin-top: 15px; }
+    .action-result strong { display: block; margin-bottom: 5px; }
+    .action-result-codes { margin-top: 8px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-weight: 800; overflow-wrap: anywhere; }
+    .action-result.success { color: #24643b; background: #e5f5e8; }
+    .issued-codes { margin-top: 13px; padding: 12px; border-radius: 10px; color: #24643b; background: #e5f5e8; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-weight: 800; overflow-wrap: anywhere; }
+    .order-list { display: grid; gap: 14px; margin-top: 20px; }
+    .order-card { padding: 19px; border: 1px solid rgba(39,17,38,.12); border-radius: 14px; background: white; }
+    .order-top { display: flex; justify-content: space-between; gap: 12px; }
+    .order-id { margin: 0; font-size: 1rem; font-weight: 850; }
+    .badge { align-self: flex-start; padding: 5px 9px; border-radius: 999px; background: #f5eddf; color: #5f4b19; font-size: .7rem; font-weight: 800; text-transform: uppercase; }
+    .badge.pending_review { background: #fff0cf; color: #77520a; }
+    .badge.approved { background: #e5f5e8; color: #24643b; }
+    .badge.rejected { background: #fff0ee; color: #7b263c; }
+    .order-info { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; margin: 15px 0 0; }
+    .order-info div { min-width: 0; }
+    .order-info dt { color: #71636d; font-size: .74rem; }
+    .order-info dd { margin: 3px 0 0; overflow-wrap: anywhere; font-size: .9rem; font-weight: 700; }
+    .order-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
+    .empty { margin: 0; padding: 26px 10px; color: #71636d; text-align: center; }
+    .ticket-codes { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .85rem; }
+    dialog { width: min(440px, calc(100% - 28px)); padding: 27px; border: 0; border-radius: 18px; color: #271126; box-shadow: 0 24px 90px rgba(20,8,20,.35); }
+    dialog::backdrop { background: rgba(28,10,27,.72); }
+    dialog h2 { margin-bottom: 8px; }
+    dialog p { color: #71636d; }
+    @media (max-width: 560px) {
+      .top-inner { min-height: 60px; }
+      main { padding-top: 30px; }
+      .panel { padding: 20px; }
+      .dashboard-header { align-items: flex-start; flex-direction: column; }
+      .order-info { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <span class="brand">Great Durga Puja · Admin</span>
+      <a href="/">Open public website</a>
+    </div>
+  </header>
+  <main>
+    <h1>Payment approvals</h1>
+    <p class="intro">Review the UPI reference against your bank or UPI app before approving. A buyer-submitted reference is not proof of payment.</p>
+
+    <section class="panel login-panel" id="login-panel" aria-labelledby="login-title">
+      <h2 id="login-title">Admin sign in</h2>
+      <p class="intro">Private owner sign-in. There is no public registration; only the person with the server's admin password can view orders or approve tickets.</p>
+      <form id="login-form">
+        <label for="admin-password">Admin password</label>
+        <input id="admin-password" type="password" autocomplete="current-password" required>
+        <div class="actions"><button class="button" type="submit" id="login-button">Sign in</button></div>
+      </form>
+      <p class="error" id="login-error" role="alert" hidden></p>
+    </section>
+
+    <section id="dashboard" hidden>
+      <div class="panel">
+        <div class="dashboard-header">
+          <div>
+            <h2>Ticket orders</h2>
+            <p>New payment references are checked every five seconds. Keep this page open for pop-up alerts.</p>
+          </div>
+          <button class="button secondary" type="button" id="logout-button">Sign out</button>
+        </div>
+        <p class="notice">The Yes button immediately issues the ticket. Press it only after independently confirming the amount arrived in your UPI app or bank account. No extra popup is required.</p>
+        <p class="connection" id="connection-status" role="status" aria-live="polite">Loading orders…</p>
+        <div class="notice action-result" id="action-result" role="status" aria-live="polite" hidden>
+          <strong id="action-result-title"></strong>
+          <span id="action-result-message"></span>
+          <div class="action-result-codes" id="action-result-codes"></div>
+        </div>
+        <div class="order-list" id="order-list"></div>
+      </div>
+    </section>
+    <p class="error" id="page-error" role="alert" hidden></p>
+  </main>
+
+  <dialog id="new-order-dialog" aria-labelledby="new-order-title">
+    <h2 id="new-order-title">New payment reference submitted</h2>
+    <p id="new-order-summary"></p>
+    <p>Check the payment in your UPI app, then approve or reject it from the order list.</p>
+    <button class="button" type="button" id="review-orders-button">Review orders</button>
+  </dialog>
+
+  <script>
+    (() => {
+      const loginPanel = document.getElementById("login-panel");
+      const loginForm = document.getElementById("login-form");
+      const loginError = document.getElementById("login-error");
+      const loginButton = document.getElementById("login-button");
+      const dashboard = document.getElementById("dashboard");
+      const orderList = document.getElementById("order-list");
+      const connectionStatus = document.getElementById("connection-status");
+      const pageError = document.getElementById("page-error");
+      const actionResult = document.getElementById("action-result");
+      const actionResultTitle = document.getElementById("action-result-title");
+      const actionResultMessage = document.getElementById("action-result-message");
+      const actionResultCodes = document.getElementById("action-result-codes");
+      const popup = document.getElementById("new-order-dialog");
+      const popupSummary = document.getElementById("new-order-summary");
+      let csrfToken = "";
+      let previousPending = null;
+      let refreshing = false;
+
+      async function request(path, options = {}) {
+        const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+        let response;
+        try {
+          response = await fetch(path, {
+            ...options,
+            headers,
+            credentials: "same-origin",
+            body: options.body === undefined ? undefined : JSON.stringify(options.body)
+          });
+        } catch (error) {
+          if (error instanceof TypeError) {
+            throw new Error(
+              "The order server is not running. Double-click start-website.bat, then open http://127.0.0.1:8000/admin and try again."
+            );
+          }
+          throw error;
+        }
+        const body = await response.text();
+        let result;
+        try {
+          result = body ? JSON.parse(body) : null;
+        } catch (error) {
+          throw new Error(
+            `The website at ${window.location.origin} is not connected to the order server (HTTP ${response.status}). Start start-website.bat and open http://127.0.0.1:8000/admin instead of using a file preview or Live Server.`
+          );
+        }
+        if (!result || typeof result !== "object") {
+          throw new Error(
+            `The website at ${window.location.origin} returned no order-server response (HTTP ${response.status}). Start start-website.bat and open http://127.0.0.1:8000/admin instead of using a file preview or Live Server.`
+          );
+        }
+        if (!response.ok) throw new Error(result.error || "The request failed.");
+        return result;
+      }
+
+      function showError(element, message) {
+        element.textContent = message;
+        element.hidden = false;
+      }
+
+      function statusLabel(status) {
+        return ({
+          awaiting_payment: "Awaiting payment",
+          pending_review: "Needs payment review",
+          approved: "Approved · ticket issued",
+          rejected: "Rejected"
+        })[status] || status;
+      }
+
+      function addInfo(container, label, value, className = "") {
+        const wrapper = document.createElement("div");
+        const term = document.createElement("dt");
+        const description = document.createElement("dd");
+        term.textContent = label;
+        description.textContent = value || "—";
+        if (className) description.className = className;
+        wrapper.append(term, description);
+        container.append(wrapper);
+      }
+
+      function showActionResult(action, order, result) {
+        actionResult.hidden = false;
+        actionResult.classList.toggle("success", action === "approve");
+        actionResultTitle.textContent = action === "approve"
+          ? "Lucky ticket issued successfully"
+          : "Order rejected";
+        actionResultMessage.textContent = action === "approve"
+          ? `Order ${order.orderId} has been approved. The buyer can now view their ticket.`
+          : `Order ${order.orderId} was rejected. No ticket was issued.`;
+        actionResultCodes.textContent = action === "approve" && Array.isArray(result.ticketCodes)
+          ? `Ticket code${result.ticketCodes.length === 1 ? "" : "s"}: ${result.ticketCodes.join(" · ")}`
+          : "";
+        actionResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      async function reviewOrder(orderId, action, order, buttons) {
+        const verb = action === "approve" ? "approve and issue the ticket for" : "reject";
+        pageError.hidden = true;
+        actionResult.hidden = true;
+        buttons.forEach((button) => { button.disabled = true; });
+        connectionStatus.textContent = action === "approve"
+          ? `Issuing ${order.quantity} ticket(s) for order ${orderId}…`
+          : `Rejecting order ${orderId}…`;
+        try {
+          const result = await request(`/api/admin/orders/${encodeURIComponent(orderId)}/${action}`, {
+            method: "POST",
+            headers: { "X-CSRF-Token": csrfToken },
+            body: {}
+          });
+          showActionResult(action, order, result);
+          connectionStatus.textContent = action === "approve"
+            ? `Order ${orderId} approved. Ticket(s) issued and now available to the buyer.`
+            : `Order ${orderId} rejected.`;
+          await refreshOrders();
+        } catch (error) {
+          buttons.forEach((button) => { button.disabled = false; });
+          showError(pageError, `Could not ${verb} this order: ${error.message}`);
+        }
+      }
+
+      function renderOrders(orders) {
+        orderList.replaceChildren();
+        if (!orders.length) {
+          const empty = document.createElement("p");
+          empty.className = "empty";
+          empty.textContent = "No orders have been submitted yet.";
+          orderList.append(empty);
+          return;
+        }
+        for (const order of orders) {
+          const card = document.createElement("article");
+          card.className = "order-card";
+          const top = document.createElement("div");
+          top.className = "order-top";
+          const id = document.createElement("h3");
+          id.className = "order-id";
+          id.textContent = `Order ${order.orderId}`;
+          const badge = document.createElement("span");
+          badge.className = `badge ${order.status}`;
+          badge.textContent = statusLabel(order.status);
+          top.append(id, badge);
+
+          const info = document.createElement("dl");
+          info.className = "order-info";
+          addInfo(info, "Buyer name", order.name);
+          addInfo(info, "Tickets / total", `${order.quantity} · ₹${order.amount}`);
+          addInfo(info, "UPI transaction reference", order.paymentReference);
+          addInfo(info, "Submitted", new Date(order.createdAt).toLocaleString());
+
+          card.append(top, info);
+          if (order.status === "approved" && Array.isArray(order.ticketCodes) && order.ticketCodes.length) {
+            const issuedCodes = document.createElement("p");
+            issuedCodes.className = "issued-codes";
+            issuedCodes.textContent = `Issued ticket${order.ticketCodes.length === 1 ? "" : "s"}: ${order.ticketCodes.join(" · ")}`;
+            card.append(issuedCodes);
+          }
+          if (order.status === "pending_review" || order.status === "awaiting_payment") {
+            const actions = document.createElement("div");
+            actions.className = "order-actions";
+            const approve = document.createElement("button");
+            approve.className = "button";
+            approve.type = "button";
+            approve.textContent = "Yes — payment received, issue ticket";
+            const reject = document.createElement("button");
+            reject.className = "button danger";
+            reject.type = "button";
+            reject.textContent = "No — reject order";
+            approve.addEventListener("click", () => reviewOrder(order.orderId, "approve", order, [approve, reject]));
+            reject.addEventListener("click", () => reviewOrder(order.orderId, "reject", order, [approve, reject]));
+            actions.append(approve, reject);
+            card.append(actions);
+          }
+          orderList.append(card);
+        }
+      }
+
+      async function refreshOrders() {
+        if (refreshing || !csrfToken) return;
+        refreshing = true;
+        try {
+          const result = await request("/api/admin/orders", {
+            headers: { "X-CSRF-Token": csrfToken }
+          });
+          const pending = result.orders.filter((order) => order.status === "pending_review");
+          if (previousPending !== null) {
+            const newlySubmitted = pending.filter((order) => !previousPending.has(order.orderId));
+            if (newlySubmitted.length && !popup.open) {
+              const order = newlySubmitted[0];
+              popupSummary.textContent = `Order ${order.orderId} from ${order.name}: ${order.quantity} ticket(s), ₹${order.amount}. UPI reference: ${order.paymentReference}.`;
+              popup.showModal();
+            }
+          }
+          previousPending = new Set(pending.map((order) => order.orderId));
+          renderOrders(result.orders);
+          connectionStatus.textContent = `Updated ${new Date().toLocaleTimeString()}. ${pending.length} order(s) need review.`;
+          pageError.hidden = true;
+        } catch (error) {
+          if (error.message.includes("sign-in") || error.message.includes("session expired")) {
+            csrfToken = "";
+            dashboard.hidden = true;
+            loginPanel.hidden = false;
+            showError(loginError, "Your admin session expired. Sign in again.");
+          } else {
+            showError(pageError, `Could not refresh orders: ${error.message}`);
+          }
+        } finally {
+          refreshing = false;
+        }
+      }
+
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        loginButton.disabled = true;
+        loginError.hidden = true;
+        try {
+          const result = await request("/api/admin/login", {
+            method: "POST",
+            body: { password: document.getElementById("admin-password").value }
+          });
+          csrfToken = result.csrfToken;
+          loginPanel.hidden = true;
+          dashboard.hidden = false;
+          loginForm.reset();
+          previousPending = null;
+          await refreshOrders();
+        } catch (error) {
+          showError(loginError, error.message);
+        } finally {
+          loginButton.disabled = false;
+        }
+      });
+
+      document.getElementById("logout-button").addEventListener("click", async () => {
+        try {
+          await request("/api/admin/logout", {
+            method: "POST",
+            headers: { "X-CSRF-Token": csrfToken },
+            body: {}
+          });
+        } catch (error) {
+          showError(pageError, `Could not sign out cleanly: ${error.message}`);
+        }
+        csrfToken = "";
+        previousPending = null;
+        dashboard.hidden = true;
+        loginPanel.hidden = false;
+      });
+
+      document.getElementById("review-orders-button").addEventListener("click", () => popup.close());
+      window.setInterval(refreshOrders, 5000);
+    })();
+  </script>
+</body>
+</html>

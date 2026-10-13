@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: great-durga-puja
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeploy: true
+    disk:
+      name: great-durga-orders
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: GREAT_DURGA_HOST
+        value: 0.0.0.0
+      - key: GREAT_DURGA_DATABASE
+        value: /var/data/orders.sqlite3
+      - key: GREAT_DURGA_COOKIE_SECURE
+        value: "1"
+      - key: GREAT_DURGA_ADMIN_PASSWORD
+        generateValue: true
